@@ -38,13 +38,13 @@ export const useLessons = (moduleId: string) => {
         .eq('module_id', moduleId)
         .order('order_index', { ascending: true });
 
-      if (error) {
-        console.error('Error fetching lessons:', error);
-        throw error;
+      if (lessonsError) {
+        console.error('Error fetching lessons:', lessonsError);
+        throw lessonsError;
       }
-      
-      console.log('Lessons fetched successfully:', data?.length);
-      return data as Lesson[];
+
+      console.log('Lessons fetched successfully:', lessons?.length);
+      return lessons as Lesson[];
     },
     enabled: !!moduleId && !!user,
   });
