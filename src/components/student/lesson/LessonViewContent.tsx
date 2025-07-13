@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { useUpdateLessonProgress } from '@/hooks/progress/useUpdateLessonProgress';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/auth';
 
 interface LessonViewContentProps {
   currentLesson: any;
@@ -33,6 +34,7 @@ export const LessonViewContent = ({
   companyId
 }: LessonViewContentProps) => {
   const navigate = useNavigate();
+  const { userRole } = useAuth();
   const [watchTime, setWatchTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [quizModalOpen, setQuizModalOpen] = useState(false);
@@ -41,6 +43,11 @@ export const LessonViewContent = ({
   const { data: lastAttempt } = useLastUserQuizAttempt(quiz?.id, currentLesson.id);
   const registerQuizAttempt = useRegisterQuizAttempt();
   const updateLessonProgress = useUpdateLessonProgress();
+
+  // Dados do quiz da aula anterior
+  const { data: prevQuizzes = [] } = useLessonQuizzes(prevLesson?.id || '');
+  const prevQuiz = useMemo(() => prevQuizzes[0], [prevQuizzes]);
+  const { data: prevAttempt } = useLastUserQuizAttempt(prevQuiz?.id, prevLesson?.id);
 
   const [quizAnswers, setQuizAnswers] = useState<any>({});
   const [quizSubmitting, setQuizSubmitting] = useState(false);
@@ -154,18 +161,16 @@ export const LessonViewContent = ({
   useEffect(() => {
     // Bloqueio de navegação direta para aulas não liberadas
     const isSequential = course?.is_sequential;
-    const userRole = (window as any).user?.user_metadata?.role || '';
     if (isSequential && userRole === 'collaborator') {
-      // Se não for a primeira aula, não for is_optional e a anterior não estiver concluída, bloquear
       if (prevLesson && !currentLesson.is_optional) {
-        const prevLessonCompleted = prevLesson.completed;
-        if (!prevLessonCompleted) {
-          // Redireciona para a primeira aula liberada
+        const prevLessonCompleted = (prevLesson as any).completed;
+        const prevQuizPassed = prevQuiz ? prevAttempt?.passed : true;
+        if (!prevLessonCompleted || !prevQuizPassed) {
           navigate(`/student/courses/${courseId}/lessons/${prevLesson.id}`);
         }
       }
     }
-  }, [course, currentLesson, prevLesson, courseId, navigate]);
+  }, [course, currentLesson, prevLesson, courseId, navigate, userRole, prevAttempt, prevQuiz]);
 
   return (
     <div className="min-h-screen bg-gray-50">
