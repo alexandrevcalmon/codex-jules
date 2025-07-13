@@ -174,12 +174,14 @@ const StudentCourseDetail = () => {
     if (!quizzesByLesson[quiz.lesson_id]) quizzesByLesson[quiz.lesson_id] = [];
     quizzesByLesson[quiz.lesson_id].push(quiz);
   });
-  const attemptsByLesson: Record<string, any[]> = {};
+  const attemptsByLesson: Record<string, any | null> = {};
   allAttempts.forEach((attempt: any) => {
     const quiz = allQuizzes.find((q: any) => q.id === attempt.quiz_id);
     if (quiz && quiz.lesson_id) {
-      if (!attemptsByLesson[quiz.lesson_id]) attemptsByLesson[quiz.lesson_id] = [];
-      attemptsByLesson[quiz.lesson_id].push(attempt);
+      const current = attemptsByLesson[quiz.lesson_id];
+      if (!current || attempt.attempt_number > current.attempt_number) {
+        attemptsByLesson[quiz.lesson_id] = attempt;
+      }
     }
   });
 
@@ -326,8 +328,8 @@ const StudentCourseDetail = () => {
                             prevCompleted = prevProgress?.completed || false;
                             const prevQuiz = quizzesByLesson[prevLesson.id];
                             const prevAttempt = attemptsByLesson[prevLesson.id];
-                            prevQuizPassed = prevQuiz ? prevAttempt?.passed : true;
-                            isBlocked = !(prevCompleted && prevQuizPassed);
+                            prevQuizPassed = prevQuiz && prevQuiz.length > 0 ? (prevAttempt?.passed ?? false) : true;
+                            isBlocked = !prevCompleted || !prevQuizPassed;
                           }
                         }
                         // LOG DE DEPURAÇÃO
