@@ -155,17 +155,18 @@ const StudentCourseDetail = () => {
 
   const quizIds = allQuizzes.map((quiz: any) => quiz.id);
   const { data: allAttempts = [], isLoading: attemptsLoading } = useQuery({
-    queryKey: ['all-quiz-attempts', quizIds],
+    queryKey: ['all-quiz-attempts', quizIds, user?.id],
     queryFn: async () => {
-      if (!quizIds.length) return [];
+      if (!quizIds.length || !user?.id) return [];
       const { data, error } = await supabase
         .from('quiz_attempts')
         .select('*')
-        .in('quiz_id', quizIds);
+        .in('quiz_id', quizIds)
+        .eq('user_id', user.id);
       if (error) throw error;
       return data;
     },
-    enabled: !!quizIds.length,
+    enabled: !!quizIds.length && !!user?.id,
   });
 
   // 4. Monte os dicionários
@@ -174,12 +175,14 @@ const StudentCourseDetail = () => {
     if (!quizzesByLesson[quiz.lesson_id]) quizzesByLesson[quiz.lesson_id] = [];
     quizzesByLesson[quiz.lesson_id].push(quiz);
   });
-  const attemptsByLesson: Record<string, any[]> = {};
+  const attemptsByLesson: Record<string, any> = {};
   allAttempts.forEach((attempt: any) => {
     const quiz = allQuizzes.find((q: any) => q.id === attempt.quiz_id);
     if (quiz && quiz.lesson_id) {
-      if (!attemptsByLesson[quiz.lesson_id]) attemptsByLesson[quiz.lesson_id] = [];
-      attemptsByLesson[quiz.lesson_id].push(attempt);
+      const current = attemptsByLesson[quiz.lesson_id];
+      if (!current || attempt.attempt_number > current.attempt_number) {
+        attemptsByLesson[quiz.lesson_id] = attempt;
+      }
     }
   });
 
