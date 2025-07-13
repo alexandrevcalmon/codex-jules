@@ -11,9 +11,11 @@ interface LessonProgressProps {
   currentLesson: StudentLesson;
   watchTime: number;
   duration: number;
+  hasQuiz: boolean;
+  quizPassed?: boolean;
 }
 
-export const LessonProgress = ({ currentLesson, watchTime, duration }: LessonProgressProps) => {
+export const LessonProgress = ({ currentLesson, watchTime, duration, hasQuiz, quizPassed }: LessonProgressProps) => {
   const { user } = useAuth();
   const { mutate: updateProgress, resetCompletionToasts } = useSimplifiedLessonProgress();
   
@@ -34,13 +36,14 @@ export const LessonProgress = ({ currentLesson, watchTime, duration }: LessonPro
   // Auto-complete lesson when 95% is watched (only once)
   useEffect(() => {
     if (
-      currentLesson && 
+      currentLesson &&
       user?.id &&
-      !currentLesson.completed && 
+      !currentLesson.completed &&
       !autoCompletedRef.current &&
-      duration > 0 && 
+      duration > 0 &&
       progressPercentage >= 95 &&
-      progressPercentage > lastProgressPercentageRef.current
+      progressPercentage > lastProgressPercentageRef.current &&
+      (!hasQuiz || quizPassed)
     ) {
       console.log('🎯 Auto-completing lesson at 95% progress');
       autoCompletedRef.current = true;
@@ -53,7 +56,7 @@ export const LessonProgress = ({ currentLesson, watchTime, duration }: LessonPro
     }
     
     lastProgressPercentageRef.current = progressPercentage;
-  }, [currentLesson, progressPercentage, duration, watchTime, updateProgress, user?.id]);
+  }, [currentLesson, progressPercentage, duration, watchTime, updateProgress, user?.id, hasQuiz, quizPassed]);
 
   // Periodic save with better timing
   useEffect(() => {

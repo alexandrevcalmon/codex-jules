@@ -9,6 +9,8 @@ interface LessonSidebarProps {
   courseId: string;
   watchTime: number;
   duration: number;
+  hasQuiz: boolean;
+  quizPassed?: boolean;
   prevLesson?: { id: string; title: string };
   nextLesson?: { id: string; title: string };
   nextLessonBlocked?: boolean;
@@ -19,9 +21,11 @@ interface LessonSidebarProps {
 export const LessonSidebar = ({ 
   currentLesson, 
   courseId, 
-  watchTime, 
-  duration, 
-  prevLesson, 
+  watchTime,
+  duration,
+  hasQuiz,
+  quizPassed,
+  prevLesson,
   nextLesson,
   nextLessonBlocked,
   nextLessonBlockedReason,
@@ -35,10 +39,12 @@ export const LessonSidebar = ({
           <CardTitle className="text-base sm:text-lg font-semibold">Progresso</CardTitle>
         </CardHeader>
         <CardContent className="pt-4 px-4 sm:px-6 pb-4 sm:pb-6">
-          <LessonProgress 
+          <LessonProgress
             currentLesson={currentLesson}
             watchTime={watchTime}
             duration={duration}
+            hasQuiz={hasQuiz}
+            quizPassed={quizPassed}
           />
         </CardContent>
       </Card>

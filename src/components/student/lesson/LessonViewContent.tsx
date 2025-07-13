@@ -88,6 +88,7 @@ export const LessonViewContent = ({
   // Progresso do vídeo
   const progressPercentage = duration > 0 ? (watchTime / duration) * 100 : 0;
   const quizEnabled = progressPercentage >= 95;
+  const hasQuiz = !!quiz;
   const quizPassed = lastAttempt?.passed;
   const quizScore = lastAttempt?.score || 0;
 
@@ -250,6 +251,8 @@ export const LessonViewContent = ({
               courseId={courseId}
               watchTime={watchTime}
               duration={duration}
+              hasQuiz={hasQuiz}
+              quizPassed={quizPassed}
               prevLesson={prevLesson}
               nextLesson={nextLesson}
               nextLessonBlocked={nextLessonBlocked}
@@ -342,6 +345,8 @@ export const LessonViewContent = ({
                 courseId={courseId}
                 watchTime={watchTime}
                 duration={duration}
+                hasQuiz={hasQuiz}
+                quizPassed={quizPassed}
                 prevLesson={prevLesson}
                 nextLesson={nextLesson}
                 nextLessonBlocked={nextLessonBlocked}
